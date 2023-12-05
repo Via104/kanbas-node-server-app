@@ -46,6 +46,10 @@ function UserRoutes(app) {
   const signin = async (req, res) => { 
     const { username, password } = req.body;
     const currentUser = await dao.findUserByCredentials(username, password);
+    if (!currentUser) {
+      res.status(404).send("User not found");
+      return;
+    }
     req.session['currentUser'] = currentUser
     res.json(currentUser);
   };
@@ -55,7 +59,12 @@ function UserRoutes(app) {
     res.json(200);
   };
 
-  const account = async (req, res) => { res.json(req.session['currentUser']);};
+  const account = async (req, res) => { 
+    if (!req.session['currentUser']) {
+      res.status(404).send("User not found");
+      return;
+    }
+    res.json(req.session['currentUser']);};
 
   app.post("/api/users", createUser);
   app.get("/api/users", findAllUsers);
